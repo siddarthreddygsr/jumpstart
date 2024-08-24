@@ -1,0 +1,22 @@
+networks:
+    jumpstart:
+        driver: bridge
+
+services:
+    app:
+        build:
+            context: ..
+            dockerfile: infra/app.dockerfile
+        networks:
+            - jumpstart
+
+
+    nginx:
+        container_name: nginx
+        build: nginx
+        ports:
+            - "80:80"
+        depends_on:
+            - app
+        networks:
+            - jumpstart
