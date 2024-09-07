@@ -31,6 +31,9 @@ jobs:
       - name: Check out source repository  
         uses: actions/checkout@v3
 
+      - name: Create Docker cache directory
+        run: mkdir -p /tmp/.buildx-cache
+
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
