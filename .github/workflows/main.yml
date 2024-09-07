@@ -1,8 +1,9 @@
-name: flake8 Lint
+name: Code Quality & Docker checks
 
 on: [push, pull_request]
 
 jobs:
+
   flake8-lint:
     runs-on: ubuntu-latest
     name: Lint
@@ -15,3 +16,20 @@ jobs:
           python-version: "3.11"
       - name: flake8 Lint
         uses: py-actions/flake8@v2
+        
+  docker-compose-test:
+    runs-on: ubuntu-latest
+    name: Docker Compose Test
+    
+    steps:
+      - name: Check out source repository  
+        uses: actions/checkout@v3
+        
+      - name: Set up Docker Compose
+        uses: docker-practice/actions-setup-docker@master
+        
+      - name: Run Docker Compose
+        run: |
+          docker-compose -f infra/docker-compose.yml up -d
+          docker-compose logs
+          docker-compose down
