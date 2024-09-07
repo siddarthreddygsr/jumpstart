@@ -6,7 +6,7 @@ jobs:
 
   flake8-lint:
     runs-on: ubuntu-latest
-    name: Lint
+    name: 🛡️ Linting with flake8
     steps:
       - name: Check out source repository
         uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
         
   docker-compose-test:
     runs-on: ubuntu-latest
-    name: Docker Compose Test
+    name: 🐳 Docker Compose Test
     
     steps:
       - name: Check out source repository  
@@ -31,5 +31,5 @@ jobs:
       - name: Run Docker Compose
         run: |
           docker compose -f infra/docker-compose.yml up -d
-          docker compose logs
+          docker compose -f infra/docker-compose.yml logs
           docker compose -f infra/docker-compose.yml down
