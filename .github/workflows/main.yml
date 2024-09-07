@@ -30,10 +30,21 @@ jobs:
     steps:
       - name: Check out source repository  
         uses: actions/checkout@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
         
       - name: Set up Docker Compose
         uses: docker-practice/actions-setup-docker@master
-        
+      
+      - name: Build Docker images
+        run: docker compose -f infra/docker-compose.yml build
+  
       - name: Run Docker Compose
         run: |
           docker compose -f infra/docker-compose.yml up -d
