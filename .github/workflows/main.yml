@@ -30,6 +30,6 @@ jobs:
         
       - name: Run Docker Compose
         run: |
-          docker-compose -f infra/docker-compose.yml up -d
-          docker-compose logs
-          docker-compose down
+          docker compose -f infra/docker-compose.yml up -d
+          docker compose logs
+          docker compose down
