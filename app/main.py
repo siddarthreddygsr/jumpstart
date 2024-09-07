@@ -16,10 +16,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/host")
 def host():
     result = subprocess.run(['hostname'], stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8').strip()
+
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(users_router, prefix="/users", tags=["users"])
