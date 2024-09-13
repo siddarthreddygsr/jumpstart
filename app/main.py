@@ -22,6 +22,10 @@ def host():
     result = subprocess.run(['hostname'], stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8').strip()
 
+@app.get("/version")
+def version():
+    return "0.1"
+
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(users_router, prefix="/users", tags=["users"])
