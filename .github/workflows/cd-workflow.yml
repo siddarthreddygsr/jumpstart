@@ -26,6 +26,6 @@ jobs:
             cd ${{ secrets.WORK_DIR }} &&
             git pull &&
             cd infra &&
-            docker-compose build &&
-            docker-compose up -d --remove-orphans
+            docker compose build &&
+            docker compose up -d --remove-orphans
           "
