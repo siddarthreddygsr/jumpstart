@@ -27,5 +27,5 @@ jobs:
             git pull &&
             cd infra &&
             docker compose build &&
-            docker compose up -d --remove-orphans
+            docker rollout -f docker-compose.yml app
           "
