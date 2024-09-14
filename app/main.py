@@ -25,7 +25,7 @@ def host():
 
 @app.get("/version")
 def version():
-    return "0.1-t"
+    return "0.1-loadtest"
 
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
