@@ -10,13 +10,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def get_user_by_username(username: str):
-    user = await users_collection.find_one({"username": username})
+async def get_user_by_email(email: str):
+    user = await users_collection.find_one({"email": email})
     return user_helper(user) if user else None
 
 
-async def authenticate_user(username: str, password: str):
-    user = await get_user_by_username(username)
+async def authenticate_user(email: str, password: str):
+    user = await get_user_by_email(email)
     if not user or not pwd_context.verify(password, user["hashed_password"]):
         return False
     return user
@@ -36,9 +36,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 def verify_token(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
-        return payload, username
+        return payload, email
     except JWTError:
         raise HTTPException(status_code=403, detail="Token is invalid or expired")
