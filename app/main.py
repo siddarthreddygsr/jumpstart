@@ -23,7 +23,7 @@ def host():
     return result.stdout.decode('utf-8').strip()
 
 
-@app.get("/version")
+@app.get("/api/v2")
 def version():
     return "0.1-loadtest1"
 
