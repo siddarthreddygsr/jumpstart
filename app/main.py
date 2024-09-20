@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.auth import router as auth_router
-from app.api.users import router as users_router
+from app.auth.routes import router as auth_router
 import subprocess
 
 app = FastAPI()
@@ -29,4 +28,3 @@ def version():
 
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
-app.include_router(users_router, prefix="/users", tags=["users"])

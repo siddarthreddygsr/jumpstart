@@ -1,15 +1,18 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from app.schemas.token import Token
-from app.schemas.loginrequest import LoginRequest
-from app.core.security import authenticate_user, create_access_token, verify_token
+from app.auth.schemas import Token
+from app.auth.schemas import LoginRequest
+from app.auth.schemas import UserCreate
+from app.core.security import authenticate_user, create_access_token, verify_token, get_user_by_email
+from app.db.database import users_collection
 from datetime import timedelta
+from passlib.context import CryptContext
 
 
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(login_request: LoginRequest):
@@ -31,3 +34,15 @@ async def login_for_access_token(login_request: LoginRequest):
 async def verify_user_token(token: str):
     payload, email = verify_token(token=token)
     return {"message": "Token is valid", "email": email, "payload": payload}
+
+
+@router.post("/register")
+async def register_user(user: UserCreate):
+    db_user = await get_user_by_email(email=user.email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = pwd_context.hash(user.password)
+    user_data = {"email": user.email, "hashed_password": hashed_password}
+    await users_collection.insert_one(user_data)
+    return {"message": "User registered successfully"}
