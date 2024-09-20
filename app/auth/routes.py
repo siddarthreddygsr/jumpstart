@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from app.auth.schemas import Token
 from app.auth.schemas import LoginRequest
 from app.auth.schemas import UserCreate
 from app.core.security import authenticate_user, create_access_token, verify_token, get_user_by_email
-from app.db.database import users_collection
+from sqlalchemy.orm import Session
+from app.db.database import get_db
+from app.auth.models import User
 from datetime import timedelta
 from passlib.context import CryptContext
+import uuid
 
 
 router = APIRouter()
@@ -14,9 +17,10 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 @router.post("/token", response_model=Token)
-async def login_for_access_token(login_request: LoginRequest):
-    user = await authenticate_user(login_request.email, login_request.password)
+async def login_for_access_token(login_request: LoginRequest, db: Session = Depends(get_db)):
+    user = await authenticate_user(login_request.email, login_request.password, db=db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,12 +41,15 @@ async def verify_user_token(token: str):
 
 
 @router.post("/register")
-async def register_user(user: UserCreate):
-    db_user = await get_user_by_email(email=user.email)
+async def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = await get_user_by_email(email=user.email, db=db)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_password = pwd_context.hash(user.password)
-    user_data = {"email": user.email, "hashed_password": hashed_password}
-    await users_collection.insert_one(user_data)
+
+    new_user = User(id=str(uuid.uuid4()).replace('-', ''), name=user.name, email=user.email, hashed_password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
     return {"message": "User registered successfully"}

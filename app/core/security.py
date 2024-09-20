@@ -3,20 +3,22 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from app.db.database import users_collection, user_helper
+from sqlalchemy.orm import Session
+from app.db.database import user_helper
 from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.auth.models import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def get_user_by_email(email: str):
-    user = await users_collection.find_one({"email": email})
+async def get_user_by_email(email: str, db: Session):
+    user = db.query(User).filter(User.email == email).first()
     return user_helper(user) if user else None
 
 
-async def authenticate_user(email: str, password: str):
-    user = await get_user_by_email(email)
+async def authenticate_user(email: str, password: str, db: Session):
+    user = await get_user_by_email(email=email, db=db)
     if not user or not pwd_context.verify(password, user["hashed_password"]):
         return False
     return user
