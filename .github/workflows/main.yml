@@ -31,19 +31,17 @@ jobs:
       - name: Check out source repository  
         uses: actions/checkout@v3
 
-      - name: Create Docker cache directory
-        run: mkdir -p /tmp/.buildx-cache
-
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-        
       - name: Set up Docker Compose
         uses: docker-practice/actions-setup-docker@master
+
+      - name: Create .env file
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
       
       - name: Build Docker images
         run: docker compose -f infra/docker-compose.yml build
